@@ -10,7 +10,7 @@ curl -sSL https://install.python-poetry.org | python3 -
 
 # Install cookiecutter
 python -m pip install --user cookiecutter
-``
+```
 
 ## Usage
 
