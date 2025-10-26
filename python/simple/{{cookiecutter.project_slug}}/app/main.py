@@ -15,7 +15,9 @@ structlog.configure(
 
 logger: BoundLogger = structlog.stdlib.get_logger(__name__)
 
+
 def sum(a: int, b: int) -> int:
     return a + b
+
 
 logger.info("Hello, world!")

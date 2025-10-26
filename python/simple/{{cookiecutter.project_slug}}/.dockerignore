@@ -1,1 +1,17 @@
+.coverage
+.dockerignore
+.env.local
+.env.test
+.gitattributes
+.gitignore
+.pytest_cache
+.python-version
+.ruff_cache
+.venv
+Dockerfile*
+Makefile*
 README.md
+app.egg-info
+dist
+htmlcov
+setup.cfg

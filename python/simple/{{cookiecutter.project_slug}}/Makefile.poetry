@@ -1,0 +1,175 @@
+SHELL := bash
+
+APP := app
+
+COLOR_BLUE := \e[34m
+COLOR_NC := \e[0m
+COLOR_YELLOW := \e[33m
+
+# Why Podman over Docker?
+#  - Deamonless
+#  - Rootless
+#  - Better security
+#  - Allow to use the '--userns=keep-id' option which is great to mount volumes with the same user id as the host.
+#
+# @see https://github.com/mamba-org/micromamba-docker/issues/407#issuecomment-2088523507
+PODMAN ?= podman
+
+# Name of the OCI image to build
+CONTAINER_IMAGE ?= bgaillard/$(APP)
+
+# Name of the Unix group / user to create in the container to keep the same UID/GID as the host
+USER ?= app
+GROUP ?= app
+
+# Build a container image with the same UID/GID as the host
+BUILD = $(PODMAN) build \
+					--build-arg GROUP=$(GROUP) \
+					--build-arg GROUP_ID=$(shell id -g) \
+					--build-arg USER_ID=$(shell id -u) \
+					--build-arg USER=$(USER)
+
+# The 'POETRY' command is used to run Poetry commands which do not update the 'poetry.lock' and 'pyproject.toml' files.
+#
+# This command allows to run Poetry after all dependencies have been installed and the virtual environment has been 
+# created.
+POETRY = $(PODMAN) run \
+				 --userns=keep-id \
+				 --rm \
+				 --volume $(PWD):/app \
+				 --volume $(HOME)/.cache/pypoetry:/home/$(USER)/.cache/pypoetry \
+				 $(CONTAINER_IMAGE):dev poetry --directory=/app 
+
+# The 'POETRY_BUILDER_BASE' command is used to run Poetry commands which update the 'poetry.lock' and 'pyproject.toml' 
+# files. 
+#
+# All updates to the 'poetry.lock' and 'pyproject.toml' files will then re-trigger a build of the 'dev' where it's used
+# because there is a copy of those files in the build of the 'dev' image.
+POETRY_BUILDER_BASE = $(PODMAN) run \
+		--userns=keep-id \
+		--rm \
+		--volume $(PWD):/app \
+		--volume $(HOME)/.cache/pypoetry:/home/$(USER)/.cache/pypoetry \
+		$(CONTAINER_IMAGE):builder-base poetry --directory=/app
+
+# @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
+ifneq ($(filter $(firstword $(MAKECMDGOALS)),poetry-add-group-dev poetry-add-group-main poetry-add-group-test),)
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+
+## == Building ==
+.PHONY: clear builder-base build build-dev poetry-add-group-dev poetry-add-group-main poetry-add-group-test poetry-check poetry-update
+clear:  ## Clear local build and temporary files
+clean:
+	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+	rm -Rf .cache
+	rm -Rf .pytest_cache
+	rm -Rf .ruff_cache
+	rm -Rf .venv
+	rm -Rf htmlcov
+	rm -Rf .coverage
+
+builder-base:
+	@ $(BUILD) --target builder-base --tag $(CONTAINER_IMAGE):builder-base .
+
+build: builder-base
+build: ## Build the production Docker image
+	@ if [ ! -f "poetry.lock" ]; \
+		then \
+			echo "You must execute 'make' update to generate a 'poetry.lock' file first!"; \
+			exit 1; \
+		fi
+	@ $(BUILD) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
+
+build-dev: builder-base
+build-dev: ## Build the development Docker image
+	@ if [ ! -f "poetry.lock" ]; \
+		then \
+			echo "You must execute 'make poetry-update' to generate a 'poetry.lock' file first!"; \
+			exit 1; \
+		fi
+	@ $(BUILD) --target dev --pull --tag $(CONTAINER_IMAGE):dev .
+
+poetry-add-group-dev: builder-base
+poetry-add-group-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) add --group dev $(RUN_ARGS)
+
+poetry-add-group-main: builder-base
+poetry-add-group-main: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) add --group main $(RUN_ARGS)
+
+poetry-add-group-test: builder-base
+poetry-add-group-test: ## Add a package to the 'test' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) add --group test $(RUN_ARGS)
+
+poetry-check: build-dev
+poetry-check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
+	@ $(POETRY) check
+
+poetry-update: builder-base
+poetry-update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
+	@ $(POETRY_BUILDER_BASE) update
+
+
+##
+## == Running ==
+.PHONY: run run-dev
+run: build
+run: ## Run the application using the production Docker image
+	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
+
+run-dev: build-dev
+run-dev: ## Run the application using the development Docker image
+	@ $(PODMAN) run \
+		--rm \
+		--volume $(PWD):/app \
+		--workdir /app \
+		$(CONTAINER_IMAGE):dev
+
+
+##
+## == Linting ==
+.PHONY: lint lint-pyright lint-ruff lint-fix lint-fix-ruff
+lint: ## Lint with pyright and ruff
+lint: lint-pyright lint-ruff
+
+lint-pyright:  ## Lint with pyright
+	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
+	@ $(POETRY) run pyright /app
+
+lint-ruff:  ## Lint with ruff 
+	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)ruff check$(COLOR_NC)"
+	@ $(POETRY) run ruff check ./$(APP)
+
+lint-fix:  ## Fix linting issues with ruff
+lint-fix: lint-fix-ruff
+
+lint-fix-ruff:  ## Fix linting issues with ruff
+	@ echo -e "\n$(COLOR_YELLOW)lint-fix$(COLOR_NC) - $(COLOR_BLUE)ruff$(COLOR_NC)"
+	@ $(POETRY) run ruff format ./$(APP)
+
+
+##
+## == Testing ==
+.PHONY: test test-cov
+test:  ## Run tests
+ifdef K
+	@ DOTENV=.env.test $(POETRY) run pytest -k "${K}"
+else
+	@ DOTENV=.env.test $(POETRY) run pytest $(APP)
+endif
+
+test-cov:  ## Run tests with coverage report
+	DOTENV=.env.test $(POETRY) run pytest --cov=. --cov-report=html $(APP)
+	@ echo "Coverage report has been written to htmlcov"
+	@ xdg-open "file://$(abspath htmlcov)/index.html"
+
+#
+# File based recipes (advanced usage)
+#
+
+.DEFAULT_GOAL := help
+help: Makefile
+	@grep -E '(^[a-zA-Z_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m## /[33m/'

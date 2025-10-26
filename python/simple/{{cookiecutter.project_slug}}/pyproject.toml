@@ -7,27 +7,22 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.13,<4.0"
+dependencies = [
+    "pydantic-settings>=2.11.0",
+    "python-dotenv>=1.1.1",
+    "structlog>=25.4.0",
+]
 
-# Show outdated packages: poetry show -o
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
+lint = [
+    "pyright[nodejs]>=1.1.407",
+    "ruff>=0.14.2",
+]
 
-[tool.poetry.group.main.dependencies]
-pydantic-settings = "^2.9"
-python-dotenv = "^1.1"
-structlog = "^25.2"
-
-[tool.poetry.group.dev.dependencies]
-anyio = "^4.9"
-colorama = "^0.4"
-coverage = "^7.8"
-pyright = "^1.1"
-pytest = "^8.3"
-pytest-cov = "^6.1"
-ruff = "^0.11"
-trio = "^0.29"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.3"
-pytest-cov = "^6.1"
 
 [tool.isort]
 multi_line_output = 3
@@ -43,7 +38,7 @@ disable = "missing-class-docstring,missing-function-docstring,missing-module-doc
 # @see https://microsoft.github.io/pyright
 # @see https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 [tool.pyright]
-typeCheckingMode = "all"
+typeCheckingMode = "standard"
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.13"
