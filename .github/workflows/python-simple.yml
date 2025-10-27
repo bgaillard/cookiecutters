@@ -1,0 +1,22 @@
+---
+name: python-simple
+on:
+  push:
+    paths:
+      - 'python/simple/**'
+  pull_request:
+    paths:
+      - 'python/simple/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.14
+      - run: pipx install cookiecutter
+      - run: |
+          cd ${{ runner.temp }}
+          cookiecutter ${{ github.workspace }} --no-input --directory="python/simple" --verbose

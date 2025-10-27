@@ -1,5 +1,8 @@
 {
   "project_name": "Sample project",
   "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_') }}",
-  "author": "Baptiste Gaillard"
+  "author": "Baptiste Gaillard",
+  "docker_build_tool": "podman",
+  "package_manager": "uv",
+  "execute_package_manager_in_docker": true
 }

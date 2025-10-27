@@ -3,8 +3,8 @@
 ARG POETRY_VERSION=2.1.2
 ARG PYTHON_VERSION=3.14
 
-ARG USER=jdoe
-ARG GROUP=jdoe
+ARG USER=app
+ARG GROUP=app
 
 
 # `python-base` sets up all our shared environment variables
