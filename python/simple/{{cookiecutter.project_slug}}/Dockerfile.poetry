@@ -1,119 +1,59 @@
-# @see https://github.com/orgs/python-poetry/discussions/1879#discussioncomment-216865
+ARG PYTHON_VERSION=3.14
 
-ARG POETRY_VERSION=2.1.2
-ARG PYTHON_VERSION=3.13
+########################################################################################################################
+# BASE
+########################################################################################################################
+FROM python:${PYTHON_VERSION}-slim as base
 
-ARG USER=jdoe
-ARG GROUP=jdoe
+# Setup a non-root user
+RUN groupadd --system --gid 1000 app \
+ && useradd --system --gid 1000 --uid 1000 app
 
-
-# `python-base` sets up all our shared environment variables
-FROM python:${PYTHON_VERSION}-slim as python-base
-
-ARG GROUP
-ARG GROUP_ID
-
-ARG USER
-ARG USER_ID
-
-    # python
+# Python
 ENV PYTHONUNBUFFERED=1 \
     # prevents python creating .pyc files
     PYTHONDONTWRITEBYTECODE=1 \
-    \
-    # pip
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    \
-    # Poetry
-    #
-    # https://python-poetry.org/docs/configuration/#using-environment-variables
-    POETRY_VERSION=${POETRY_VERSION} \
+    VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+
+# Install the project into `/app`
+WORKDIR /app
+
+
+########################################################################################################################
+# BUILDER
+########################################################################################################################
+FROM base as builder
+
+ENV POETRY_CACHE_DIR=/tmp/poetry_cache \ 
+    POETRY_VIRTUALENVS_CREATE=true \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    XDG_DATA_HOME=/home/$USER/.local/share
+    POETRY_NO_INTERACTION=1
+
+RUN apt-get update && \
+  apt-get install --no-install-recommends -y \
+    # deps for installing poetry
+    curl \
+    # deps for building python deps
+    build-essential && \ 
+  curl -sSL https://install.python-poetry.org | python
+
+COPY pyproject.toml poetry.lock /app/
+
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR \
+  touch README.md && \
+  export PATH="/root/.local/bin:$PATH" && \
+  poetry install --compile --no-root --no-interaction --without=dev --without=lint && \
+  rm README.md
 
 
-ENV VIRTUAL_ENV=/app/.venv \
-    PATH="/home/$USER/.local/bin:/app/.venv/bin:$PATH"
-
-# https://vsupalov.com/docker-shared-permissions/
-RUN addgroup --gid $GROUP_ID $GROUP
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
-
-
-########################################################################################################################
-# POETRY BUILDER
-########################################################################################################################
-FROM python-base as builder-base
-
-ARG USER
-
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        # deps for installing poetry
-        curl \
-        # deps for building python deps
-        build-essential
+FROM base as prod
+COPY --chown=app:app --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 USER $USER
-RUN curl -sSL https://install.python-poetry.org | python
 
+COPY . /app
 
-########################################################################################################################
-# DEV
-########################################################################################################################
-FROM python-base as dev
-
-ARG GROUP
-ARG USER
-
-COPY --chown=$USER:$GROUP --from=builder-base /home/$USER/.local/bin/poetry /home/$USER/.local/bin/poetry
-COPY --chown=$USER:$GROUP --from=builder-base /home/$USER/.local/share /home/$USER/.local/share
-
-RUN mkdir -p /app
-RUN chown -R $USER:$GROUP /app
-
-COPY --chown=$USER:$GROUP poetry.lock pyproject.toml /app/
-
-USER $USER
-WORKDIR /app
-
-RUN /home/$USER/.local/bin/poetry install --no-root --with dev --with test
-
-# Install Pyright using pyright-python, it will automatically install Node.js and pyright
-RUN echo "print('ok')" > /tmp/a.py && poetry run pyright /tmp/a.py && rm /tmp/a.py
-
-CMD ["python", "-m", "app.main"]
-
-
-########################################################################################################################
-# PROD
-########################################################################################################################
-FROM builder-base as builder-prod
-
-ARG GROUP
-ARG USER
-
-USER $USER
-WORKDIR /app
-COPY --chown=$USER:$GROUP poetry.lock pyproject.toml ./
-RUN /home/$USER/.local/bin/poetry install --no-root
-
-
-FROM python-base as prod
-
-ARG GROUP
-ARG USER
-
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.bash_logout /home/$USER/.bash_logout
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.bashrc /home/$USER/.bashrc
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.profile /home/$USER/.profile
-COPY --chown=$USER:$GROUP --from=builder-prod /app /app
-COPY --chown=$USER:$GROUP ./app /app/app
-
-USER $USER
-WORKDIR /app
+RUN chown -R app:app /app
 
 CMD ["python", "-m", "app.main"]

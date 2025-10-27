@@ -18,39 +18,7 @@ PODMAN ?= podman
 # Name of the OCI image to build
 CONTAINER_IMAGE ?= bgaillard/$(APP)
 
-# Name of the Unix group / user to create in the container to keep the same UID/GID as the host
-USER ?= app
-GROUP ?= app
-
-# Build a container image with the same UID/GID as the host
-BUILD = $(PODMAN) build \
-					--build-arg GROUP=$(GROUP) \
-					--build-arg GROUP_ID=$(shell id -g) \
-					--build-arg USER_ID=$(shell id -u) \
-					--build-arg USER=$(USER)
-
-# The 'POETRY' command is used to run Poetry commands which do not update the 'poetry.lock' and 'pyproject.toml' files.
-#
-# This command allows to run Poetry after all dependencies have been installed and the virtual environment has been 
-# created.
-POETRY = $(PODMAN) run \
-				 --userns=keep-id \
-				 --rm \
-				 --volume $(PWD):/app \
-				 --volume $(HOME)/.cache/pypoetry:/home/$(USER)/.cache/pypoetry \
-				 $(CONTAINER_IMAGE):dev poetry --directory=/app 
-
-# The 'POETRY_BUILDER_BASE' command is used to run Poetry commands which update the 'poetry.lock' and 'pyproject.toml' 
-# files. 
-#
-# All updates to the 'poetry.lock' and 'pyproject.toml' files will then re-trigger a build of the 'dev' where it's used
-# because there is a copy of those files in the build of the 'dev' image.
-POETRY_BUILDER_BASE = $(PODMAN) run \
-		--userns=keep-id \
-		--rm \
-		--volume $(PWD):/app \
-		--volume $(HOME)/.cache/pypoetry:/home/$(USER)/.cache/pypoetry \
-		$(CONTAINER_IMAGE):builder-base poetry --directory=/app
+POETRY ?= poetry
 
 # @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
 ifneq ($(filter $(firstword $(MAKECMDGOALS)),poetry-add-group-dev poetry-add-group-main poetry-add-group-test),)
@@ -71,46 +39,23 @@ clean:
 	rm -Rf htmlcov
 	rm -Rf .coverage
 
-builder-base:
-	@ $(BUILD) --target builder-base --tag $(CONTAINER_IMAGE):builder-base .
+build-docker: ## Build the production Docker image
+	@ $(PODMAN) build --file $(DOCKERFILE) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
 
-build: builder-base
-build: ## Build the production Docker image
-	@ if [ ! -f "poetry.lock" ]; \
-		then \
-			echo "You must execute 'make' update to generate a 'poetry.lock' file first!"; \
-			exit 1; \
-		fi
-	@ $(BUILD) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
+add: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group main $(RUN_ARGS)
 
-build-dev: builder-base
-build-dev: ## Build the development Docker image
-	@ if [ ! -f "poetry.lock" ]; \
-		then \
-			echo "You must execute 'make poetry-update' to generate a 'poetry.lock' file first!"; \
-			exit 1; \
-		fi
-	@ $(BUILD) --target dev --pull --tag $(CONTAINER_IMAGE):dev .
+add-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group dev $(RUN_ARGS)
 
-poetry-add-group-dev: builder-base
-poetry-add-group-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
-	@ $(POETRY_BUILDER_BASE) add --group dev $(RUN_ARGS)
+add-lint: ## Add a package to the 'test' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group lint $(RUN_ARGS)
 
-poetry-add-group-main: builder-base
-poetry-add-group-main: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
-	@ $(POETRY_BUILDER_BASE) add --group main $(RUN_ARGS)
-
-poetry-add-group-test: builder-base
-poetry-add-group-test: ## Add a package to the 'test' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
-	@ $(POETRY_BUILDER_BASE) add --group test $(RUN_ARGS)
-
-poetry-check: build-dev
-poetry-check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
+check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
 	@ $(POETRY) check
 
-poetry-update: builder-base
-poetry-update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
-	@ $(POETRY_BUILDER_BASE) update
+update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
+	@ $(POETRY) update
 
 
 ##
@@ -137,7 +82,7 @@ lint: lint-pyright lint-ruff
 
 lint-pyright:  ## Lint with pyright
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
-	@ $(POETRY) run pyright /app
+	@ $(POETRY) run pyright ./app
 
 lint-ruff:  ## Lint with ruff 
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)ruff check$(COLOR_NC)"

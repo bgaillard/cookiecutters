@@ -10,7 +10,6 @@
 .venv
 Dockerfile*
 Makefile*
-README.md
 app.egg-info
 dist
 htmlcov

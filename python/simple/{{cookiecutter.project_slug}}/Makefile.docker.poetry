@@ -19,8 +19,8 @@ PODMAN ?= podman
 CONTAINER_IMAGE ?= bgaillard/$(APP)
 
 # Name of the Unix group / user to create in the container to keep the same UID/GID as the host
-USER ?= jdoe
-GROUP ?= jdoe
+USER ?= app
+GROUP ?= app
 
 # Build a container image with the same UID/GID as the host
 BUILD = $(PODMAN) build \
