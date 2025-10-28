@@ -1,20 +1,13 @@
-import logging
 import os
 
-logging.basicConfig(level=logging.DEBUG)
+def strtobool(value: str) -> bool:
+  value = value.lower()
+  if value in ("y", "yes", "on", "1", "true", "t"):
+    return True
+  return False
 
-current_working_directory: str = os.getcwd()
-
-logging.debug(f"Current working directory: {current_working_directory}")
-
-for f in os.listdir(current_working_directory):
-    logging.debug(f"Found file/directory: {f}")
-
-project_name: str = "{{ cookiecutter.project_name }}"
-
-docker_build_tool: str = "{{ cookiecutter.docker_build_tool }}"
 package_manager: str = "{{ cookiecutter.package_manager }}"
-execute_package_manager_in_docker: str = "{{ cookiecutter.execute_package_manager_in_docker }}"
+execute_package_manager_in_docker: bool = strtobool("{{ cookiecutter.execute_package_manager_in_docker }}")
 
 if package_manager == "uv":
     os.remove("Dockerfile.docker.poetry")
@@ -22,3 +15,32 @@ if package_manager == "uv":
     os.remove("Makefile.docker.poetry")
     os.remove("Makefile.poetry")
     os.remove("poetry.lock")
+
+    if execute_package_manager_in_docker:
+        os.remove("Dockerfile.uv")
+        os.remove("Makefile.uv")
+        os.rename("Dockerfile.docker.uv", "Dockerfile")
+        os.rename("Makefile.docker.uv", "Makefile")
+    else:
+        os.remove("Dockerfile.docker.uv")
+        os.remove("Makefile.docker.uv")
+        os.rename("Dockerfile.uv", "Dockerfile")
+        os.rename("Makefile.uv", "Makefile")
+
+elif package_manager == "poetry":
+    os.remove("Dockerfile.docker.uv")
+    os.remove("Dockerfile.uv")
+    os.remove("Makefile.docker.uv")
+    os.remove("Makefile.uv")
+    os.remove("uv.lock")
+
+    if execute_package_manager_in_docker:
+        os.remove("Dockerfile.poetry")
+        os.remove("Makefile.poetry")
+        os.rename("Dockerfile.docker.poetry", "Dockerfile")
+        os.rename("Makefile.docker.poetry", "Makefile")
+    else:
+        os.remove("Dockerfile.docker.poetry")
+        os.remove("Makefile.docker.poetry")
+        os.rename("Dockerfile.poetry", "Dockerfile")
+        os.rename("Makefile.poetry", "Makefile")

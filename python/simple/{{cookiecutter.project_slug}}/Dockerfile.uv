@@ -8,7 +8,7 @@ FROM python:${PYTHON_VERSION}-slim
 RUN groupadd --system --gid 1000 app \
  && useradd --system --gid 1000 --uid 1000 app
 
-# Install the project into `/app`
+# Install the project into '/app'
 WORKDIR /app
 
 # Enable bytecode compilation

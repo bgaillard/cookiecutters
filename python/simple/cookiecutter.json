@@ -4,5 +4,14 @@
   "author": "Baptiste Gaillard",
   "docker_build_tool": "podman",
   "package_manager": "uv",
-  "execute_package_manager_in_docker": true
+  "execute_package_manager_in_docker": false,
+  "_exclude": [
+    ".pytest_cache/",
+    ".ruff_cache/",
+    ".venv/",
+    "app.egg-info/",
+    "dist/",
+    "htmlcov/",
+    ".coverage"
+  ]
 }

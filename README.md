@@ -21,3 +21,12 @@ cd /path/to/your/projects
 # Run cookiecutter
 cookiecutter ~/workspace/cookiecutters/python/fast-api-simple
 ```
+
+## Testing
+
+```bash
+# Testing the 'python/simple' cookiecutter
+python -m pip install --user cookiecutter
+cd python simple
+make test
+```

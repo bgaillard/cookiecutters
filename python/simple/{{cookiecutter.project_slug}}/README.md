@@ -6,14 +6,12 @@ Pick the right Makefile and Dockerfile, then delete this file and the other setu
 
 ### Available setups 
 
-|------------------------|-------------------------|------------------------------|
 | Tool                   | Makefile                | Dockerfile                   |
 |------------------------|-------------------------|------------------------------|
 | `uv`                   | `Makefile.uv`           | `Dockerfile.uv`              |
 | `uv` inside Docker     | `Makefile.docker.uv`    | `Dockerfile.docker.uv`       |
 | `poetry`               | `Makefile.poetry`       | `Dockerfile.poetry`          |
 | `poetry` inside Docker | `Makefile.docker.poetry`| `Dockerfile.docker.poetry`   |
-|------------------------|-------------------------|------------------------------|
 
 ### Sample startup commands
 

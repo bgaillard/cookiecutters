@@ -158,7 +158,7 @@ test:  ## Run tests
 ifdef K
 	@ DOTENV=.env.test $(POETRY) run pytest -k "${K}"
 else
-	@ DOTENV=.env.test $(POETRY) run pytest $(APP)
+	@ DOTENV=.env.test $(POETRY) run pytest --doctest-modules --junitxml=junit/test-results.xml $(APP)
 endif
 
 test-cov:  ## Run tests with coverage report

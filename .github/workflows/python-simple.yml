@@ -9,14 +9,32 @@ on:
       - 'python/simple/**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - name: Checkout repository 
+        uses: actions/checkout@v5
+      # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        id: python
         with:
           python-version: 3.14
-      - run: pipx install cookiecutter
-      - run: |
-          cd ${{ runner.temp }}
-          cookiecutter ${{ github.workspace }} --no-input --directory="python/simple" --verbose
+      - name: Install dependencies
+        run: |
+          pipx install cookiecutter
+          pip install -U pytest
+          pip install -U cookiecutter
+        env:
+          PIPX_DEFAULT_PYTHON: ${{ steps.python.outputs.python-path }}
+      - name: Run tests
+        run: |
+          cd python/simple
+          make test
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-python-simple
+          path: python/simple/junit/test-results.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
