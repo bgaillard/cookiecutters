@@ -18,6 +18,7 @@ PODMAN ?= podman
 # Name of the OCI image to build
 CONTAINER_IMAGE ?= bgaillard/$(APP)
 
+export POETRY_VIRTUALENVS_IN_PROJECT=true
 POETRY ?= poetry
 
 # @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
@@ -33,11 +34,12 @@ clear:  ## Clear local build and temporary files
 clean:
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	rm -Rf .cache
+	rm -Rf .coverage
 	rm -Rf .pytest_cache
 	rm -Rf .ruff_cache
 	rm -Rf .venv
 	rm -Rf htmlcov
-	rm -Rf .coverage
+	rm -Rf junit
 
 build-docker: ## Build the production Docker image
 	@ $(PODMAN) build --file $(DOCKERFILE) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
@@ -53,6 +55,9 @@ add-lint: ## Add a package to the 'test' group in the 'pyproject.toml' file and 
 
 check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
 	@ $(POETRY) check
+
+install: ## Install the project dependencies using the 'poetry.lock' file
+	@ $(POETRY) install
 
 update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
 	@ $(POETRY) update

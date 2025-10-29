@@ -52,11 +52,12 @@ clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	rm -Rf .cache
+	rm -Rf .coverage
 	rm -Rf .pytest_cache
 	rm -Rf .ruff_cache
 	rm -Rf .venv
 	rm -Rf htmlcov
-	rm -Rf .coverage
+	rm -Rf junit
 
 build: ## Build the source distribution (i.e. sdist) and binary distribution (i.e. wheel)
 	@ $(UV) build

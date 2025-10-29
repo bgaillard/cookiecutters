@@ -65,11 +65,12 @@ clear:  ## Clear local build and temporary files
 clean:
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	rm -Rf .cache
+	rm -Rf .coverage
 	rm -Rf .pytest_cache
 	rm -Rf .ruff_cache
 	rm -Rf .venv
 	rm -Rf htmlcov
-	rm -Rf .coverage
+	rm -Rf junit
 
 builder-base:
 	@ $(BUILD) --target builder-base --tag $(CONTAINER_IMAGE):builder-base .
@@ -92,24 +93,27 @@ build-dev: ## Build the development Docker image
 		fi
 	@ $(BUILD) --target dev --pull --tag $(CONTAINER_IMAGE):dev .
 
-poetry-add-group-dev: builder-base
-poetry-add-group-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
-	@ $(POETRY_BUILDER_BASE) add --group dev $(RUN_ARGS)
-
-poetry-add-group-main: builder-base
-poetry-add-group-main: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+add: builder-base
+add: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
 	@ $(POETRY_BUILDER_BASE) add --group main $(RUN_ARGS)
 
-poetry-add-group-test: builder-base
-poetry-add-group-test: ## Add a package to the 'test' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
-	@ $(POETRY_BUILDER_BASE) add --group test $(RUN_ARGS)
+add-dev: builder-base
+add-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) add --group dev $(RUN_ARGS)
 
-poetry-check: build-dev
-poetry-check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
-	@ $(POETRY) check
+add-lint: builder-base
+add-lint: ## Add a package to the 'lint' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) add --group lint $(RUN_ARGS)
 
-poetry-update: builder-base
-poetry-update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
+check: build-dev
+check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
+	@ $(POETRY_BUILDER_BASE) check
+
+install: ## Install the project dependencies using the 'poetry.lock' file
+	@ $(POETRY_BUILDER_BASE) install
+
+update: builder-base
+update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
 	@ $(POETRY_BUILDER_BASE) update
 
 
