@@ -6,8 +6,6 @@ COLOR_BLUE := \e[34m
 COLOR_NC := \e[0m
 COLOR_YELLOW := \e[33m
 
-DOCKERFILE ?= Dockerfile
-
 # Why Podman over Docker?
 #  - Deamonless
 #  - Rootless
@@ -20,20 +18,19 @@ PODMAN ?= podman
 # Name of the OCI image to build
 CONTAINER_IMAGE ?= bgaillard/$(APP)
 
-UV ?= uv
-UVX ?= uvx
+POETRY ?= poetry
 
 # @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
-ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
+ifneq ($(filter $(firstword $(MAKECMDGOALS)),poetry-add-group-dev poetry-add-group-main poetry-add-group-test),)
   RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)
 endif
 
 
-.PHONY: clear build build-dev add add-dev add-lint remove
 ## == Building ==
-clear: clean  ## Alias for 'make clean'
-clean:  ## Clean local build and temporary files
+.PHONY: clear builder-base build build-dev poetry-add-group-dev poetry-add-group-main poetry-add-group-test poetry-check poetry-update
+clear:  ## Clear local build and temporary files
+clean:
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 	rm -Rf .cache
 	rm -Rf .pytest_cache
@@ -42,32 +39,29 @@ clean:  ## Clean local build and temporary files
 	rm -Rf htmlcov
 	rm -Rf .coverage
 
-build: ## Build the source distribution (i.e. sdist) and binary distribution (i.e. wheel)
-	@ $(UV) build
-
 build-docker: ## Build the production Docker image
-	@ $(PODMAN) build -f $(DOCKERFILE) --pull --tag $(CONTAINER_IMAGE):prod .
+	@ $(PODMAN) build --file $(DOCKERFILE) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
 
-add: ## Add a dependency
-	@ $(UV) add $(RUN_ARGS)
+add: ## Add a package to the 'main' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group main $(RUN_ARGS)
 
-add-dev: ## Add a dependency to the 'dev' group
-	@ $(UV) add --dev $(RUN_ARGS)
+add-dev: ## Add a package to the 'dev' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group dev $(RUN_ARGS)
 
-add-lint: ## Add a development to the 'lint' group
-	@ $(UV) add --group lint $(RUN_ARGS)
+add-lint: ## Add a package to the 'test' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
+	@ $(POETRY) add --group lint $(RUN_ARGS)
 
-remove: ## Remove a dependency
-	@ $(UV) remove $(RUN_ARGS)
+check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
+	@ $(POETRY) check
 
-update: ## Create or update the 'uv.lock' file (i.e. update project dependencies)
-	@ $(UV) update
+update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
+	@ $(POETRY) update
 
 
 ##
 ## == Running ==
 .PHONY: run run-dev
-run: build-docker
+run: build
 run: ## Run the application using the production Docker image
 	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
 
@@ -83,29 +77,23 @@ run-dev: ## Run the application using the development Docker image
 ##
 ## == Linting ==
 .PHONY: lint lint-pyright lint-ruff lint-fix lint-fix-ruff
-format: ## Alias for 'make lint-fix-ruff'
-	@ $(UV) format --preview-features format
-
-format-check: ## Alias for 'make lint-ruff'
-	@ $(UV) format --check --preview-features format
-
 lint: ## Lint with pyright and ruff
 lint: lint-pyright lint-ruff
 
 lint-pyright:  ## Lint with pyright
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
-	@ $(UVX) pyright ./app
+	@ $(POETRY) run pyright ./app
 
 lint-ruff:  ## Lint with ruff 
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)ruff check$(COLOR_NC)"
-	@ $(UVX) ruff check ./$(APP)
+	@ $(POETRY) run ruff check ./$(APP)
 
 lint-fix:  ## Fix linting issues with ruff
 lint-fix: lint-fix-ruff
 
 lint-fix-ruff:  ## Fix linting issues with ruff
 	@ echo -e "\n$(COLOR_YELLOW)lint-fix$(COLOR_NC) - $(COLOR_BLUE)ruff$(COLOR_NC)"
-	@ $(UVX) ruff format ./$(APP)
+	@ $(POETRY) run ruff format ./$(APP)
 
 
 ##
@@ -113,13 +101,13 @@ lint-fix-ruff:  ## Fix linting issues with ruff
 .PHONY: test test-cov
 test:  ## Run tests
 ifdef K
-	@ DOTENV=.env.test $(UV) run pytest -k "${K}"
+	@ DOTENV=.env.test $(POETRY) run pytest -k "${K}"
 else
-	@ DOTENV=.env.test $(UV) run pytest --doctest-modules --junitxml=junit/test-results.xml $(APP)
+	@ DOTENV=.env.test $(POETRY) run pytest --doctest-modules --junitxml=junit/test-results.xml $(APP)
 endif
 
 test-cov:  ## Run tests with coverage report
-	DOTENV=.env.test $(UV) run pytest --cov=. --cov-report=html $(APP)
+	DOTENV=.env.test $(POETRY) run pytest --cov=. --cov-report=html $(APP)
 	@ echo "Coverage report has been written to htmlcov"
 	@ xdg-open "file://$(abspath htmlcov)/index.html"
 

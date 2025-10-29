@@ -69,15 +69,12 @@ update: ## Create or update the 'uv.lock' file (i.e. update project dependencies
 .PHONY: run run-dev
 run: build-docker
 run: ## Run the application using the production Docker image
-	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
+	# FIXME: we should not force the 'podman' network here and use the default 'pasta' one for rootless containers
+	@ $(PODMAN) run -p 8000:8000 --network podman --rm $(CONTAINER_IMAGE):prod
 
-run-dev: build-dev
+run-dev:
 run-dev: ## Run the application using the development Docker image
-	@ $(PODMAN) run \
-		--rm \
-		--volume $(PWD):/app \
-		--workdir /app \
-		$(CONTAINER_IMAGE):dev
+	@ $(UV) run fastapi dev
 
 
 ##

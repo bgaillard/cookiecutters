@@ -20,8 +20,24 @@ PODMAN ?= podman
 # Name of the OCI image to build
 CONTAINER_IMAGE ?= bgaillard/$(APP)
 
-UV ?= uv
-UVX ?= uvx
+# Build a container image with the same UID/GID as the host
+BUILD = $(PODMAN) build \
+					--build-arg GROUP=app \
+					--build-arg GROUP_ID=$(shell id -g) \
+					--build-arg USER_ID=$(shell id -u) \
+					--build-arg USER=app \
+					--file $(DOCKERFILE) 
+
+DOCKER_DEV ?= $(PODMAN) run --rm \
+			--userns=keep-id \
+			--workdir /app \
+			--env UV_PYTHON_CACHE_DIR=/root/.cache/uv/python \
+			--volume $(HOME)/.cache/uv:/root/.cache/uv \
+			--volume $(CURDIR)/.:/app \
+			--volume /app/.venv \
+			$(CONTAINER_IMAGE):dev
+UV ?= $(DOCKER_DEV) uv
+UVX ?= $(DOCKER_DEV) uvx
 
 # @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
 ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
@@ -30,7 +46,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
 endif
 
 
-.PHONY: clear build build-dev add add-dev add-lint remove
+.PHONY: clear build build-docker build-docker-dev add add-dev add-lint remove
 ## == Building ==
 clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files
@@ -46,7 +62,10 @@ build: ## Build the source distribution (i.e. sdist) and binary distribution (i.
 	@ $(UV) build
 
 build-docker: ## Build the production Docker image
-	@ $(PODMAN) build -f $(DOCKERFILE) --pull --tag $(CONTAINER_IMAGE):prod .
+	@ $(BUILD) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
+
+build-docker-dev: ## Build the development Docker image
+	@ $(BUILD) --target dev --pull --tag $(CONTAINER_IMAGE):dev .
 
 add: ## Add a dependency
 	@ $(UV) add $(RUN_ARGS)
@@ -60,8 +79,8 @@ add-lint: ## Add a development to the 'lint' group
 remove: ## Remove a dependency
 	@ $(UV) remove $(RUN_ARGS)
 
-update: ## Create or update the 'uv.lock' file (i.e. update project dependencies)
-	@ $(UV) update
+sync: ## Create or update the 'uv.lock' file (i.e. update project dependencies)
+	@ $(UV) sync
 
 
 ##
@@ -71,13 +90,9 @@ run: build-docker
 run: ## Run the application using the production Docker image
 	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
 
-run-dev: build-dev
+run-dev: build-docker-dev
 run-dev: ## Run the application using the development Docker image
-	@ $(PODMAN) run \
-		--rm \
-		--volume $(PWD):/app \
-		--workdir /app \
-		$(CONTAINER_IMAGE):dev
+	@ $(DOCKER_DEV)
 
 
 ##
@@ -92,6 +107,7 @@ format-check: ## Alias for 'make lint-ruff'
 lint: ## Lint with pyright and ruff
 lint: lint-pyright lint-ruff
 
+lint-pyright: build-docker-dev
 lint-pyright:  ## Lint with pyright
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
 	@ $(UVX) pyright ./app

@@ -12,5 +12,6 @@ Dockerfile*
 Makefile*
 app.egg-info
 dist
+junit
 htmlcov
 setup.cfg
