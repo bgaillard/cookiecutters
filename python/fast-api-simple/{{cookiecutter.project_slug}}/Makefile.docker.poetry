@@ -53,7 +53,7 @@ POETRY_BUILDER_BASE = $(PODMAN) run \
 		$(CONTAINER_IMAGE):builder-base poetry --directory=/app
 
 # @see https://stackoverflow.com/questions/2214575/passing-arguments-to-make-run/14061796#14061796
-ifneq ($(filter $(firstword $(MAKECMDGOALS)),poetry-add-group-dev poetry-add-group-main poetry-add-group-test),)
+ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint),)
   RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)
 endif

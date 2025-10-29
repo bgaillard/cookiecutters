@@ -30,7 +30,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
 endif
 
 
-.PHONY: clear build build-dev add add-dev add-lint remove
+.PHONY: clear build build-dev add add-dev add-lint remove update
 ## == Building ==
 clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files

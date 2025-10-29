@@ -46,7 +46,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
 endif
 
 
-.PHONY: clear build build-docker build-docker-dev add add-dev add-lint remove
+.PHONY: clear build build-docker build-docker-dev add add-dev add-lint remove sync
 ## == Building ==
 clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files
