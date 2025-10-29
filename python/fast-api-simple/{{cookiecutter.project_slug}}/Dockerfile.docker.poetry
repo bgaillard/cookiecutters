@@ -31,8 +31,7 @@ ENV PYTHONUNBUFFERED=1 \
     # https://python-poetry.org/docs/configuration/#using-environment-variables
     POETRY_VERSION=${POETRY_VERSION} \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    XDG_DATA_HOME=/home/$USER/.local/share
+    POETRY_NO_INTERACTION=1
 
 
 ENV VIRTUAL_ENV=/app/.venv \
@@ -107,9 +106,6 @@ FROM python-base as prod
 ARG GROUP
 ARG USER
 
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.bash_logout /home/$USER/.bash_logout
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.bashrc /home/$USER/.bashrc
-COPY --chown=$USER:$GROUP --from=builder-prod /home/$USER/.profile /home/$USER/.profile
 COPY --chown=$USER:$GROUP --from=builder-prod /app /app
 COPY --chown=$USER:$GROUP ./app /app/app
 
