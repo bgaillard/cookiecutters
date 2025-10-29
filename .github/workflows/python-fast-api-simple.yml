@@ -39,6 +39,55 @@ jobs:
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
+  test-with-poetry: 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "python/fast-api-simple/{{cookiecutter.project_slug}}"
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v5
+      # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.14
+      - name: Install poetry
+        run: |
+          pipx install poetry
+      - name: Create .venv
+        run: DOCKERFILE=Dockerfile.poetry make -f Makefile.poetry install
+      - name: Lint
+        run: DOCKERFILE=Dockerfile.poetry make -f Makefile.poetry lint
+      - name: Test
+        run: DOCKERFILE=Dockerfile.poetry make -f Makefile.poetry test
+      - name: Build docker
+        run: DOCKERFILE=Dockerfile.poetry make -f Makefile.poetry build-docker
+
+  test-with-poetry-in-docker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "python/fast-api-simple/{{cookiecutter.project_slug}}"
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v5
+      # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.14
+      - name: Build docker dev
+        run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry build-docker-dev
+      - name: Create .venv
+        run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry install
+      - name: Lint
+        run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry lint
+      - name: Test
+        run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry test
+      - name: Build docker
+        run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry build-docker
+
   test-with-uv: 
     runs-on: ubuntu-latest
     defaults:

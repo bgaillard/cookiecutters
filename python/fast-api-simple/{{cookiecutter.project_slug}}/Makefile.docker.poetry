@@ -27,7 +27,8 @@ BUILD = $(PODMAN) build \
 					--build-arg GROUP=$(GROUP) \
 					--build-arg GROUP_ID=$(shell id -g) \
 					--build-arg USER_ID=$(shell id -u) \
-					--build-arg USER=$(USER)
+					--build-arg USER=$(USER) \
+					--file $(DOCKERFILE) 
 
 # The 'POETRY' command is used to run Poetry commands which do not update the 'poetry.lock' and 'pyproject.toml' files.
 #
@@ -60,7 +61,7 @@ endif
 
 
 ## == Building ==
-.PHONY: clear builder-base build build-dev poetry-add-group-dev poetry-add-group-main poetry-add-group-test poetry-check poetry-update
+.PHONY: clear builder-base build-docker build-docker-dev poetry-add-group-dev poetry-add-group-main poetry-add-group-test poetry-check poetry-update
 clear:  ## Clear local build and temporary files
 clean:
 	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
@@ -75,8 +76,8 @@ clean:
 builder-base:
 	@ $(BUILD) --target builder-base --tag $(CONTAINER_IMAGE):builder-base .
 
-build: builder-base
-build: ## Build the production Docker image
+build-docker: builder-base
+build-docker: ## Build the production Docker image
 	@ if [ ! -f "poetry.lock" ]; \
 		then \
 			echo "You must execute 'make' update to generate a 'poetry.lock' file first!"; \
@@ -84,8 +85,8 @@ build: ## Build the production Docker image
 		fi
 	@ $(BUILD) --target prod --pull --tag $(CONTAINER_IMAGE):prod .
 
-build-dev: builder-base
-build-dev: ## Build the development Docker image
+build-docker-dev: builder-base
+build-docker-dev: ## Build the development Docker image
 	@ if [ ! -f "poetry.lock" ]; \
 		then \
 			echo "You must execute 'make poetry-update' to generate a 'poetry.lock' file first!"; \
@@ -105,11 +106,13 @@ add-lint: builder-base
 add-lint: ## Add a package to the 'lint' group in the 'pyproject.toml' file and update the 'poetry.lock' file.
 	@ $(POETRY_BUILDER_BASE) add --group lint $(RUN_ARGS)
 
-check: build-dev
+check: builder-base
 check: ## Validates the content of the 'pyproject.toml' file and its consistency with the 'poetry.lock' file.
 	@ $(POETRY_BUILDER_BASE) check
 
+install: builder-base
 install: ## Install the project dependencies using the 'poetry.lock' file
+	@ mkdir -p $(HOME)/.cache/pypoetry
 	@ $(POETRY_BUILDER_BASE) install
 
 update: builder-base

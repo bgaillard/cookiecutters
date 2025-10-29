@@ -1,6 +1,6 @@
 # @see https://github.com/orgs/python-poetry/discussions/1879#discussioncomment-216865
 
-ARG POETRY_VERSION=2.1.2
+ARG POETRY_VERSION=2.2.1
 ARG PYTHON_VERSION=3.14
 
 ARG USER=app
@@ -80,7 +80,7 @@ COPY --chown=$USER:$GROUP poetry.lock pyproject.toml /app/
 USER $USER
 WORKDIR /app
 
-RUN /home/$USER/.local/bin/poetry install --no-root --with dev --with test
+RUN /home/$USER/.local/bin/poetry install --no-root --with dev --with lint
 
 # Install Pyright using pyright-python, it will automatically install Node.js and pyright
 RUN echo "print('ok')" > /tmp/a.py && poetry run pyright /tmp/a.py && rm /tmp/a.py
