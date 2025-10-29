@@ -30,7 +30,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
 endif
 
 
-.PHONY: clear build build-dev add add-dev add-lint remove update
+.PHONY: clear build build-dev add add-dev add-lint remove sync update venv
 ## == Building ==
 clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files
@@ -61,9 +61,14 @@ add-lint: ## Add a development to the 'lint' group
 remove: ## Remove a dependency
 	@ $(UV) remove $(RUN_ARGS)
 
+sync: ## Update the project's environment using the 'uv.lock' file
+	@ $(UV) sync
+
 update: ## Create or update the 'uv.lock' file (i.e. update project dependencies)
 	@ $(UV) update
 
+venv: ## Create a virtual environment using the 'uv.lock' file
+	@ $(UV) venv
 
 ##
 ## == Running ==

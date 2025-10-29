@@ -9,7 +9,7 @@ on:
       - 'python/simple/**'
 
 jobs:
-  test:
+  test-cookiecutter-rendering:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository 
@@ -27,14 +27,62 @@ jobs:
           pip install -U cookiecutter
         env:
           PIPX_DEFAULT_PYTHON: ${{ steps.python.outputs.python-path }}
-      - name: Run tests
+      - name: Test cookiecutter rendering
         run: |
           cd python/simple
           make test
-      - name: Upload pytest test results
+      - name: Upload cookiecutter pytest test results
         uses: actions/upload-artifact@v4
         with:
           name: pytest-results-python-simple
           path: python/simple/junit/test-results.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
+
+  test-with-uv: 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "python/simple/{{cookiecutter.project_slug}}"
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v5
+      # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.14
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Create .venv
+        run: DOCKERFILE=Dockerfile.uv make -f Makefile.uv sync
+      - name: Lint
+        run: DOCKERFILE=Dockerfile.uv make -f Makefile.uv lint
+      - name: Test
+        run: DOCKERFILE=Dockerfile.uv make -f Makefile.uv test
+      - name: Build docker
+        run: DOCKERFILE=Dockerfile.uv make -f Makefile.uv build-docker
+
+  test-with-uv-in-docker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "python/simple/{{cookiecutter.project_slug}}"
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v5
+      # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.14
+      - name: Build docker dev
+        run: DOCKERFILE=Dockerfile.docker.uv make -f Makefile.docker.uv build-docker-dev
+      - name: Create .venv
+        run: DOCKERFILE=Dockerfile.docker.uv make -f Makefile.docker.uv sync
+      - name: Lint
+        run: DOCKERFILE=Dockerfile.docker.uv make -f Makefile.docker.uv lint
+      - name: Test
+        run: DOCKERFILE=Dockerfile.docker.uv make -f Makefile.docker.uv test
+      - name: Build docker
+        run: DOCKERFILE=Dockerfile.docker.uv make -f Makefile.docker.uv build-docker

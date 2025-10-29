@@ -81,6 +81,7 @@ remove: ## Remove a dependency
 	@ $(UV) remove $(RUN_ARGS)
 
 sync: ## Create or update the 'uv.lock' file (i.e. update project dependencies)
+	@ mkdir -p $(HOME)/.cache/uv
 	@ $(UV) sync
 
 
