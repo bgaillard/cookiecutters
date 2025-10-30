@@ -10,6 +10,7 @@ COMMON_FILE_NAMES: list[str] = [
     ".gitattributes",
     ".gitignore",
     ".python-version",
+    "CHANGELOG.md",
     "Dockerfile",
     "Makefile",
     "README.md",

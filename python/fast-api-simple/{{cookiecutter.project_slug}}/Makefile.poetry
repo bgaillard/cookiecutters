@@ -59,6 +59,9 @@ check: ## Validates the content of the 'pyproject.toml' file and its consistency
 install: ## Install the project dependencies using the 'poetry.lock' file
 	@ $(POETRY) install
 
+show-outdated: ## Show the latest version but only for packages that are outdated.
+	@ $(POETRY) show --outdated
+
 update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
 	@ $(POETRY) update
 

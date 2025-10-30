@@ -115,6 +115,9 @@ install: ## Install the project dependencies using the 'poetry.lock' file
 	@ mkdir -p $(HOME)/.cache/pypoetry
 	@ $(POETRY_BUILDER_BASE) install
 
+show-outdated: ## Show the latest version but only for packages that are outdated.
+	@ $(POETRY_BUILDER_BASE) show --outdated
+
 update: builder-base
 update: ## Create or update the 'poetry.lock' file (i.e. update Poetry dependencies)
 	@ $(POETRY_BUILDER_BASE) update

@@ -1,3 +1,5 @@
+# @see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+
 [project]
 name = "app"
 version = "1.0.0"
@@ -6,13 +8,14 @@ authors = [
   {name = "Baptiste Gaillard", email = "baptiste.gaillard@gmail.com"}
 ]
 readme = "README.md"
+
+# @see https://iscinumpy.dev/post/bound-version-constraints/
 requires-python = ">=3.13,<4.0"
 dependencies = [
     "pydantic-settings>=2.11.0",
     "python-dotenv>=1.1.1",
     "structlog>=25.4.0",
 ]
-
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
@@ -20,7 +23,7 @@ dev = [
 ]
 lint = [
     "pyright[nodejs]>=1.1.407",
-    "ruff>=0.14.2",
+    "ruff>=0.14.2"
 ]
 
 
