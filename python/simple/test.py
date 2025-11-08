@@ -64,7 +64,7 @@ def test_default(tmp_path: Path) -> None:
 def test_with_poetry(tmp_path: Path) -> None:
     project_dir: Path = Path(
         cookiecutter(  # pyright: ignore[reportUnknownArgumentType]
-            template=".",  
+            template=".",
             no_input=True,
             extra_context={"package_manager": "poetry"},
             output_dir=str(tmp_path),

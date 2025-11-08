@@ -92,7 +92,7 @@ lint-pyright:  ## Lint with pyright
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
 	@ $(POETRY) run pyright ./app
 
-lint-ruff:  ## Lint with ruff 
+lint-ruff:  ## Lint with ruff
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)ruff check$(COLOR_NC)"
 	@ $(POETRY) run ruff check ./$(APP)
 

@@ -28,21 +28,21 @@ BUILD = $(PODMAN) build \
 					--build-arg GROUP_ID=$(shell id -g) \
 					--build-arg USER_ID=$(shell id -u) \
 					--build-arg USER=$(USER) \
-					--file $(DOCKERFILE) 
+					--file $(DOCKERFILE)
 
 # The 'POETRY' command is used to run Poetry commands which do not update the 'poetry.lock' and 'pyproject.toml' files.
 #
-# This command allows to run Poetry after all dependencies have been installed and the virtual environment has been 
+# This command allows to run Poetry after all dependencies have been installed and the virtual environment has been
 # created.
 POETRY = $(PODMAN) run \
 				 --userns=keep-id \
 				 --rm \
 				 --volume $(PWD):/app \
 				 --volume $(HOME)/.cache/pypoetry:/home/$(USER)/.cache/pypoetry \
-				 $(CONTAINER_IMAGE):dev poetry --directory=/app 
+				 $(CONTAINER_IMAGE):dev poetry --directory=/app
 
-# The 'POETRY_BUILDER_BASE' command is used to run Poetry commands which update the 'poetry.lock' and 'pyproject.toml' 
-# files. 
+# The 'POETRY_BUILDER_BASE' command is used to run Poetry commands which update the 'poetry.lock' and 'pyproject.toml'
+# files.
 #
 # All updates to the 'poetry.lock' and 'pyproject.toml' files will then re-trigger a build of the 'dev' where it's used
 # because there is a copy of those files in the build of the 'dev' image.
@@ -149,7 +149,7 @@ lint-pyright:  ## Lint with pyright
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)pyright$(COLOR_NC)"
 	@ $(POETRY) run pyright /app
 
-lint-ruff:  ## Lint with ruff 
+lint-ruff:  ## Lint with ruff
 	@ echo -e "\n$(COLOR_YELLOW)lint$(COLOR_NC) - $(COLOR_BLUE)ruff check$(COLOR_NC)"
 	@ $(POETRY) run ruff check ./$(APP)
 

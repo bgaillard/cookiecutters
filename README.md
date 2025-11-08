@@ -6,14 +6,15 @@ Carefully designed collection of [Cookiecutter](https://cookiecutter.readthedocs
 
 Each template tries to implement best practices, here are few of them:
 
+- [`AGENTS.md`](https://agents.md/) file used to work with AI agents like [OpenCode](https://opencode.ai/), [Claude code](https://www.claude.com/product/claude-code), [Gemini CLI](https://geminicli.com/), etc.
 - `README.md` file with indications to quickly start
 - `CHANGELOG.md` file based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) principles
 - Use of [Semantic Versioning](https://semver.org/)
-- Makefiles with commands for common tasks (e.g. building, testing, running, linting, formatting)
-- Source code linted with best linters and reporting no issue
+- Makefile with commands for common tasks (e.g. building, testing, running, linting, formatting)
+- Source code linted with carefully chosen linters and reporting no issue
 - Usage of [pre-commit](https://pre-commit.com/) to run linters and formatters before each commit
 - Dependencies and transitive dependencies continuously updated using [Dependabot](https://dependabot.com/) or [Renovate](https://docs.renovatebot.com/)
-- Dockerfiles optimized for image size and performance to quickly deploy them to any environment
+- Dockerfile optimized for image size and performance to quickly deploy to any environment
 - Structured logging frameworks configured with sensible defaults
 - Sample dotenv files to manage environment variables
 - Configuration file for application parameters

@@ -4,7 +4,7 @@
 
 Pick the right Makefile and Dockerfile, then delete this file and the other setup files (Makefile and Dockerfile files).
 
-### Available setups 
+### Available setups
 
 | Tool                   | Makefile                | Dockerfile                   |
 |------------------------|-------------------------|------------------------------|

@@ -1,7 +1,7 @@
 # Good management of EOL and encoding in GIT is painful if no well managed
 #
 # This file allows the following.
-#  - Enforce line endings in the whole repository, it is based on behavior of new GIT versions which default to LF line 
+#  - Enforce line endings in the whole repository, it is based on behavior of new GIT versions which default to LF line
 #    endings when 'text' is specified.
 #  - Enforce good encoding for text files, if a text file is not encoded in UTF-8 then GIT will automatically change the
 #    encoding to UTF-8.
@@ -15,7 +15,7 @@
 #  - https://buzut.net/cours/versioning-avec-git/normalisation-des-fichiers
 #  - https://stackoverflow.com/questions/59434963/existing-git-repository-with-files-in-mixed-encodings
 #
-# IMPORTANT: If this is the first time you configure this file in your project you should refresh your repository to 
+# IMPORTANT: If this is the first time you configure this file in your project you should refresh your repository to
 #            rewrite all the files with the new LF line endings and UTF-8 encoding. Follow the below link for detailed
 #            instructions.
 #
@@ -29,7 +29,7 @@
 #
 #                git ls-files --stage --abbrev --eol
 #
-#            It should display 'i/lf' on the fourth column and 'w/lf' on the fifth one. If this is not the case for all 
+#            It should display 'i/lf' on the fourth column and 'w/lf' on the fifth one. If this is not the case for all
 #            files you can terminate the conversions on specific files with the 'dos2unix' command.
 #
 #            If you would like to manually change the encoding of a file you can use the 'iconv' command.
@@ -49,7 +49,7 @@
 #  - Convert text files which are not encoded in UTF-8 to UTF-8.
 #
 # The following practices should be followed to edit this list.
-#  - The 'diff' attribute can only be specified if the file type is present in the "builtin patterns" documented at 
+#  - The 'diff' attribute can only be specified if the file type is present in the "builtin patterns" documented at
 #    https://git-scm.com/docs/gitattributes
 #  - All text files (generally source code and documentation) should be configured with the 'text' attribute.
 #  - All binary files (generally images, videos, and executables) should be configured with the 'binary' attribute.
@@ -112,7 +112,7 @@ Vagrantfile     text working-tree-encoding=UTF-8
 
 # Linguistic configuration
 #
-# This section helps GIT to identify languages associated to files and then allow Github, Gitlab or Bitbucket to 
+# This section helps GIT to identify languages associated to files and then allow Github, Gitlab or Bitbucket to
 # correctly display languages statistics.
 #
 # For additional documentation see the following pages.

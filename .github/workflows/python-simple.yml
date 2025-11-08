@@ -12,7 +12,7 @@ jobs:
   test-cookiecutter-rendering:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v5
       # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
       - name: Set up Python 3.14
@@ -39,13 +39,13 @@ jobs:
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
-  test-with-poetry: 
+  test-with-poetry:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: "python/simple/{{cookiecutter.project_slug}}"
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v5
       # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
       - name: Set up Python 3.14
@@ -70,7 +70,7 @@ jobs:
       run:
         working-directory: "python/simple/{{cookiecutter.project_slug}}"
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v5
       # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
       - name: Set up Python 3.14
@@ -88,13 +88,13 @@ jobs:
       - name: Build docker
         run: DOCKERFILE=Dockerfile.docker.poetry make -f Makefile.docker.poetry build-docker
 
-  test-with-uv: 
+  test-with-uv:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: "python/simple/{{cookiecutter.project_slug}}"
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v5
       # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
       - name: Set up Python 3.14
@@ -118,7 +118,7 @@ jobs:
       run:
         working-directory: "python/simple/{{cookiecutter.project_slug}}"
     steps:
-      - name: Checkout repository 
+      - name: Checkout repository
         uses: actions/checkout@v5
       # @see https://github.com/actions/setup-python/issues/967#issuecomment-2430610509
       - name: Set up Python 3.14

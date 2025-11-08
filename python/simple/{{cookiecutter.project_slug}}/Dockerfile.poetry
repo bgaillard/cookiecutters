@@ -25,7 +25,7 @@ WORKDIR /app
 ########################################################################################################################
 FROM base as builder
 
-ENV POETRY_CACHE_DIR=/tmp/poetry_cache \ 
+ENV POETRY_CACHE_DIR=/tmp/poetry_cache \
     POETRY_VIRTUALENVS_CREATE=true \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_NO_INTERACTION=1
@@ -35,7 +35,7 @@ RUN apt-get update && \
     # deps for installing poetry
     curl \
     # deps for building python deps
-    build-essential && \ 
+    build-essential && \
   curl -sSL https://install.python-poetry.org | python
 
 COPY pyproject.toml poetry.lock /app/

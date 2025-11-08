@@ -66,7 +66,7 @@ def test_default(tmp_path: Path) -> None:
 def test_with_poetry(tmp_path: Path) -> None:
     project_dir: Path = Path(
         cookiecutter(  # pyright: ignore[reportUnknownArgumentType]
-            template=".",  
+            template=".",
             no_input=True,
             extra_context={"package_manager": "poetry"},
             output_dir=str(tmp_path),
@@ -179,4 +179,3 @@ def test_with_uv_in_docker(tmp_path: Path) -> None:
     # Ensure the 'Makefile' is the right one
     makefile: Path = project_dir.joinpath("Makefile")
     assert_file_contains(makefile, "UV ?= $(DOCKER_DEV) uv")
-
