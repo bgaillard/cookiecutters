@@ -17,6 +17,8 @@ if package_manager == "uv":
     os.remove("Makefile.poetry")
     os.remove("poetry.lock")
 
+    os.rename(".github/dependabot.uv.yml", ".github/dependabot.yml")
+
     if execute_package_manager_in_docker:
         os.remove("Dockerfile.uv")
         os.remove("Makefile.uv")
@@ -35,6 +37,8 @@ elif package_manager == "poetry":
     os.remove("Makefile.docker.uv")
     os.remove("Makefile.uv")
     os.remove("uv.lock")
+
+    os.rename(".github/dependabot.poetry.yml", ".github/dependabot.yml")
 
     if execute_package_manager_in_docker:
         os.remove("Dockerfile.poetry")

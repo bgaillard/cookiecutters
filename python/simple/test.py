@@ -32,8 +32,8 @@ def assert_file_contains(file_path: Path, expected_content: str) -> None:
 
 
 def assert_file_exists(project_dir: Path, expected_file_names: list[str]) -> None:
-    for f in Path(project_dir).iterdir():
-        assert f.name in expected_file_names
+    for efn in expected_file_names:
+        assert (project_dir / efn).exists()
 
 
 def test_default(tmp_path: Path) -> None:
