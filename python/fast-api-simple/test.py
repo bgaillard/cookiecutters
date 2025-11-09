@@ -9,6 +9,7 @@ COMMON_FILE_NAMES: list[str] = [
     ".env.test",
     ".gitattributes",
     ".gitignore",
+    ".pre-commit-config.yaml",
     ".python-version",
     "CHANGELOG.md",
     "Dockerfile",
