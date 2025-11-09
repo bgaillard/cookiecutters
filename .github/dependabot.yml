@@ -43,6 +43,21 @@ updates:
     directories:
       - "/python/fast-api-simple/{{cookiecutter.project_slug}}/"
       - "/python/simple/{{cookiecutter.project_slug}}/"
+    groups:
+      # Security updates
+      development-security-updates:
+        applies-to: "security-updates"
+        dependency-type: development
+      production-security-updates:
+        applies-to: "security-updates"
+        dependency-type: production
+      # Version updates
+      development-version-updates:
+        applies-to: "version-updates"
+        dependency-type: development
+      production-version-updates:
+        applies-to: "version-updates"
+        dependency-type: production
     schedule:
       interval: "weekly"
     assignees:
