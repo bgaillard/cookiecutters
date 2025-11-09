@@ -1,0 +1,20 @@
+---
+# @see https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directories:
+      - "/python/fast-api-simple/{{cookiecutter.project_slug}}/"
+      - "/python/simple/{{cookiecutter.project_slug}}/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "bgaillard"
+  - package-ecosystem: "uv"
+    directories:
+      - "/python/fast-api-simple/{{cookiecutter.project_slug}}/"
+      - "/python/simple/{{cookiecutter.project_slug}}/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "bgaillard"
