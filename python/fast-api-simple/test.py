@@ -4,6 +4,7 @@ from pathlib import Path
 PROJECT_NAME: str = "sample_fastapi_project"
 
 COMMON_FILE_NAMES: list[str] = [
+    ".github/dependabot.yml",
     ".dockerignore",
     ".env.local",
     ".env.test",

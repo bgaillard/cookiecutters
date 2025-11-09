@@ -2,6 +2,7 @@ from cookiecutter.main import cookiecutter  # pyright: ignore[reportMissingTypeS
 from pathlib import Path
 
 COMMON_FILE_NAMES: list[str] = [
+    ".github/dependabot.yml",
     ".dockerignore",
     ".env.local",
     ".env.test",

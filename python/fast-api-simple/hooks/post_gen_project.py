@@ -10,6 +10,7 @@ package_manager: str = "{{ cookiecutter.package_manager }}"
 execute_package_manager_in_docker: bool = strtobool("{{ cookiecutter.execute_package_manager_in_docker }}")
 
 if package_manager == "uv":
+    os.remove(".github/dependabot.poetry.yml")
     os.remove("Dockerfile.docker.poetry")
     os.remove("Dockerfile.poetry")
     os.remove("Makefile.docker.poetry")
@@ -28,6 +29,7 @@ if package_manager == "uv":
         os.rename("Makefile.uv", "Makefile")
 
 elif package_manager == "poetry":
+    os.remove(".github/dependabot.uv.yml")
     os.remove("Dockerfile.docker.uv")
     os.remove("Dockerfile.uv")
     os.remove("Makefile.docker.uv")
