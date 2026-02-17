@@ -78,12 +78,8 @@ run: ## Run the application using the production Docker image
 	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
 
 run-dev: build-dev
-run-dev: ## Run the application using the development Docker image
-	@ $(PODMAN) run \
-		--rm \
-		--volume $(PWD):/app \
-		--workdir /app \
-		$(CONTAINER_IMAGE):dev
+run-dev: ## Run the application using uv in development mode
+	@ $(UV) run -m app.main
 
 
 ##

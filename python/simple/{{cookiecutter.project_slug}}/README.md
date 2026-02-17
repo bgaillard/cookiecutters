@@ -20,7 +20,7 @@ uv run nvim
 # Update the 'uv.lock' file / update the dependencies
 make update
 
-# Run the application using the production Docker image
+# Run the application using the uv and development mode
 make run-dev
 
 # Run the application using the production Docker image
