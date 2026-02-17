@@ -77,7 +77,6 @@ run: build-docker
 run: ## Run the application using the production Docker image
 	@ $(PODMAN) run --rm $(CONTAINER_IMAGE):prod
 
-run-dev: build-dev
 run-dev: ## Run the application using uv in development mode
 	@ $(UV) run -m app.main
 
