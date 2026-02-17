@@ -46,7 +46,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),add add-dev add-lint remove),)
 endif
 
 
-.PHONY: clear build build-docker build-docker-dev add add-dev add-lint remove sync
+.PHONY: clear build build-docker build-docker-dev add add-dev add-lint lock-upgrade remove sync
 ## == Building ==
 clear: clean  ## Alias for 'make clean'
 clean:  ## Clean local build and temporary files
@@ -76,6 +76,9 @@ add-dev: ## Add a dependency to the 'dev' group
 
 add-lint: ## Add a development to the 'lint' group
 	@ $(UV) add --group lint $(RUN_ARGS)
+
+lock-upgrade: ## Update the dependencies in the 'uv.lock' file
+	@ $(UV) lock --upgrade
 
 remove: ## Remove a dependency
 	@ $(UV) remove $(RUN_ARGS)
