@@ -20,13 +20,13 @@ dependencies = [
 ]
 [dependency-groups]
 dev = [
-    "anyio[trio]>=4.11.0",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
+    "anyio[trio]>=4.13.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
 ]
 lint = [
-    "pyright[nodejs]>=1.1.407",
-    "ruff>=0.14.2",
+    "pyright[nodejs]>=1.1.408",
+    "ruff>=0.15.10",
 ]
 
 [tool.isort]
