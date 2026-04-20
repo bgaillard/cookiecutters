@@ -18,13 +18,13 @@ dependencies = [
 ]
 [dependency-groups]
 dev = [
-    "basedpyright>=1.39.0",
+    "basedpyright>=1.39.2",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
 ]
 lint = [
     "pyright[nodejs]>=1.1.408",
-    "ruff>=0.15.10"
+    "ruff>=0.15.11"
 ]
 
 
