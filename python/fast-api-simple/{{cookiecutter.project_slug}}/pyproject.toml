@@ -16,7 +16,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "structlog>=26.1.0",
-    "uvicorn[standard]>=0.50.0",
+    "uvicorn[standard]>=0.50.2",
 ]
 [dependency-groups]
 dev = [
