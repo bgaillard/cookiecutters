@@ -1,7 +1,8 @@
 import logging
 import sys
-import structlog
 from typing import cast
+
+import structlog
 from structlog.stdlib import BoundLogger
 
 from .config import config
