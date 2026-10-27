@@ -12,8 +12,8 @@ readme = "README.md"
 # @see https://iscinumpy.dev/post/bound-version-constraints/
 requires-python = ">=3.14,<4.0"
 dependencies = [
-    "fastapi>=0.143.2",
-    "pydantic-settings>=2.16.0",
+    "fastapi>=0.162.0",
+    "pydantic-settings>=2.16.1",
     "python-dotenv>=1.2.4",
     "structlog>=26.1.0",
     "uvicorn[standard]>=0.54.0",
